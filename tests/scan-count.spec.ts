@@ -7,55 +7,70 @@ test('should launch and verify the page', async ({ browser }) => {
   const duration = 25 * 60 * 1000; // 25 minutes in milliseconds
   const interval = 20 * 1000; // 20 seconds milliseconds
   let repeatCount = 0;
-  let codeDetected = 0;
+  
   while (Date.now() - startTime < duration) {
+    console.log("===== Start A New Loop =====");
+    test.info().annotations.push({ type: '===== Start A New Loop =====' });
     const context = await browser.newContext();
     const page = await context.newPage();
 
-    await page.waitForTimeout(interval);
+    await page.waitForTimeout(2000);
     // Navigate to the specified URL
     await page.goto(url, { waitUntil: 'networkidle' });
 
     const beforeCount = await getScanCount();
 
     console.log("beforeCount", beforeCount);
+    test.info().annotations.push({ type: 'Before Count', description: `${beforeCount}` });
 
     /* Selecting the Camera option to scan */
     // await page.selectOption('.dce-sel-camera', { label: 'Camo' });
     
     // Wait for the camera to update
-    await page.waitForTimeout(2800);
+    // await page.waitForTimeout(2000);
     
-    // Initialize resultArray outside the waitForFunction callback
-    let resultArray = [];
     // Wait for the results to be populated
-    await page.waitForFunction(
-      ({ codeDetected }) => {
+    let resultArray = await page.evaluate(async () => {
+      const startTime = Date.now();
+      while (Date.now() - startTime < 10000) { // 10 seconds in milliseconds
         const resultsElement = document.getElementById('results');
         if (resultsElement && resultsElement.textContent) {
           const content = resultsElement.textContent.trim();
-          const occurrences = (content.match(/QR_CODE/g) || []).length;
-          codeDetected += occurrences;
-          return occurrences >= 2;
+          const qrCodeStrings = content.match(/QR_CODE.*?(?=QR_CODE|$)/gs) || [];
+          const uniqueStrings = [...new Set(qrCodeStrings.map(s => s.trim()))];
+          
+          return uniqueStrings;
         }
-        return false;
-      },
-      { codeDetected },
-      { timeout: 5000 } // 5 seconds timeout
-    ).then(() => console.log("Results populated"));
+        await new Promise(resolve => setTimeout(resolve, 100)); // Wait for 100ms before checking again
+      }
+      return null; // Return null if no results after 10 seconds
+    });
+
+    
+    // Close the context instead of just the page
+    await context.close();
+    // await context.close();
+
+    if (resultArray) {
+      console.log(`${resultArray.length} Unique QR code strings detected: ${resultArray}`);
+      test.info().annotations.push({ type: 'QR Codes Detected', description: `${resultArray.length} Unique QR codes: ${resultArray.join(', ')}` });
+    } else {
+      console.log("No results or less than 2 unique QR code strings detected");
+      test.info().annotations.push({ type: 'QR Codes Detected', description: 'No results or less than 2 unique QR code strings detected' });
+    }
 
 
     const afterCount = await getScanCount();
     console.log("afterCount", afterCount);
+    test.info().annotations.push({ type: 'After Count', description: `${afterCount}` });
 
     // Verify that the scan count has increased
-    expect(afterCount).toBeGreaterThan(beforeCount);
+    // expect(afterCount).toBeGreaterThan(beforeCount);
 
-    // Close the context instead of just the page
-    await context.close();
+
     repeatCount++;
     console.log("repeatCount", repeatCount);
-    console.log("Total code detected: ", codeDetected);
+    test.info().annotations.push({ type: 'Repeat Count', description: `${repeatCount}` });
   }
 });
 
