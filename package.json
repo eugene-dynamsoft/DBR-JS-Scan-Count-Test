@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "npm run",
-    "test": "playwright test"
+    "test": "npx playwright test"
   },
   "author": "Eugene Yu",
   "license": "ISC",

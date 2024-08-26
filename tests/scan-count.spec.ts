@@ -1,11 +1,12 @@
 import { test, expect } from '@playwright/test';
 
+// Customize the URL to your local live server
 const url = 'https://192.168.1.178:5503/hello-world.html';
 
 test('should launch and verify the page', async ({ browser }) => {
   const startTime = Date.now();
-  const duration = 25 * 60 * 1000; // 25 minutes in milliseconds
-  const interval = 20 * 1000; // 20 seconds milliseconds
+  const duration = 25 * 60 * 1000; // 25 minutes in milliseconds for total test duration
+  const interval = 3 * 60 * 1000; // 3 minutes milliseconds delay between each scan loop
   let repeatCount = 0;
   
   while (Date.now() - startTime < duration) {
@@ -14,7 +15,7 @@ test('should launch and verify the page', async ({ browser }) => {
     const context = await browser.newContext();
     const page = await context.newPage();
 
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(interval);
     // Navigate to the specified URL
     await page.goto(url, { waitUntil: 'networkidle' });
 
