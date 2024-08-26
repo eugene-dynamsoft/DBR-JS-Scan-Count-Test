@@ -1,0 +1,16 @@
+{
+  "name": "dbr-js-scan-count-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "npm run",
+    "test": "playwright test"
+  },
+  "author": "Eugene Yu",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.46.1",
+    "@types/node": "^22.5.0"
+  }
+}
