@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+    <h1>Hello World JS 8 (Decode via Camera)</h1>
+    <div id="camera-view-container" style="width: 100%; height: 80vh"></div>
+    Results:<br />
+    <div id="results" style="width: 100%; height: 10vh; overflow: auto; white-space: pre-wrap"></div>
+    <button id="getScanCountBtn">Get Scan Count</button>
+    <div id="scanCount"></div>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/dynamsoft-javascript-barcode@8.2.5/dist/dbr.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-javascript-barcode@8.2.5/dist/dbr.js" data-productKeys="102975012-TXlXZWJQcm9q"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/dynamsoft-javascript-barcode@8.6.1/dist/dbr.js"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/dynamsoft-javascript-barcode@8.8.7/dist/dbr.js"></script> -->
+    <script>
+        // Specifies a license, you can visit https://www.dynamsoft.com/customer/license/trialLicense?ver=9.6.42&utm_source=guide&product=dbr&package=js to get your own trial license good for 30 days. 
+        const license = 'DLS2eyJoYW5kc2hha2VDb2RlIjoiMTAyOTc1MDEyLVRYbFhaV0pRY205cSIsIm1haW5TZXJ2ZXJVUkwiOiJodHRwczovL21kbHMuZHluYW1zb2Z0b25saW5lLmNvbS8iLCJvcmdhbml6YXRpb25JRCI6IjEwMjk3NTAxMiIsInN0YW5kYnlTZXJ2ZXJVUkwiOiJodHRwczovL3NkbHMuZHluYW1zb2Z0b25saW5lLmNvbS8iLCJjaGVja0NvZGUiOi0xMzA1NTA5MjJ9';
+        // Dynamsoft.DBR.BarcodeReader.organizationID = "102975012";
+        // Dynamsoft.DBR.BarcodeReader.handshakeCode = "100078431-103165908"; 
+        // Dynamsoft.DBR.BarcodeReader.productKey = 
+        // Dynamsoft.DBR.BarcodeScanner.license = license;
+        Dynamsoft.DBR.BarcodeReader.licenseServer = ["https://mdls.dynamsoftonline.com/"];
+        let scanner = null;
+        let resultArray = [];
+        (async()=>{
+            scanner = await Dynamsoft.DBR.BarcodeScanner.createInstance();
+            await scanner.updateRuntimeSettings("speed");
+            let scanSettings = await scanner.getScanSettings();
+            scanSettings.intervalTime = 50;
+            scanSettings.duplicateForgetTime = 1000;
+            await scanner.updateScanSettings(scanSettings);
+
+            // scanner.onFrameRead = results => {console.log(results);};
+            scanner.onUnduplicatedRead = (txt, result) => {
+                const resultsContainer = document.querySelector("#results");
+                resultsContainer.textContent = "";
+                console.log(txt);
+                resultArray.push(txt);
+                console.log(`Number of code scanned: ${resultArray.length}`);
+                console.log(`Current scanned code: ${resultArray}`);
+                resultsContainer.textContent += `${txt}\n\n`;
+            };
+            document.querySelector("#camera-view-container").append(scanner.getUIElement());
+            await scanner.show();
+        })();
+        
+
+        async function getScanCount(license = '') {
+            let rep = await fetch('https://mdls.dynamsoftonline.com/license/item/103082778', {
+            
+                headers: {
+                DynamsoftLTSTokenV2: "6QPu2+Aqj3bSW+VbIl8M7+Rj3vKW4rNllpC7s8HJ2Z4+2jWB7KwCuL5/sW6cnEZjMf0/WqiJU5MJq/r+CxGARfcGlMXn599xM0I6kjtByykm8DTdIJUneHk95g=="
+                },
+                cache: "no-cache"
+            })
+            
+            if(!rep.ok){
+                throw Error("fetch failure!")
+            }
+
+            let obj = await rep.json();
+            console.log(obj.usedCount);// The scan count
+            return obj.usedCount;
+        }
+
+        document.getElementById('getScanCountBtn').addEventListener('click', async () => {
+            try {
+                document.getElementById('scanCount').textContent = 'Getting scan count...';
+                const count = await getScanCount(license);
+                document.getElementById('scanCount').textContent = `Current Scan Count: ${count}`;
+            } catch (error) {
+                console.error('Error getting scan count:', error);
+                document.getElementById('scanCount').textContent = 'Error getting scan count';
+            }
+        });
+    </script>
+</body>
+
+</html>

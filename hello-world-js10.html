@@ -10,19 +10,20 @@
   </head>
 
   <body>
-    <h1>Hello World (Decode via Camera)</h1>
+    <h1>Hello World JS 10 (Decode via Camera)</h1>
     <div id="camera-view-container" style="width: 100%; height: 80vh"></div>
     Results:<br />
     <div id="results" style="width: 100%; height: 10vh; overflow: auto; white-space: pre-wrap"></div>
     <button id="getScanCountBtn">Get Scan Count</button>
     <div id="scanCount"></div>
-    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-barcode-reader-bundle@10.2.1000/dist/dbr.bundle.js"></script>
-    <script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/dynamsoft-barcode-reader-bundle@10.2.1000/dist/dbr.bundle.js"></script> -->
+    <script type="module" src="./test.js">  </script>
+    <script type="module">
       /** LICENSE ALERT - README
        * To use the library, you need to first specify a license key using the API "initLicense()" as shown below.
        */
-      const license = 'DLS2eyJoYW5kc2hha2VDb2RlIjoiMTAyOTc1MDEyLVRYbFhaV0pRY205cSIsIm1haW5TZXJ2ZXJVUkwiOiJodHRwczovL21kbHMuZHluYW1zb2Z0b25saW5lLmNvbS8iLCJvcmdhbml6YXRpb25JRCI6IjEwMjk3NTAxMiIsInN0YW5kYnlTZXJ2ZXJVUkwiOiJodHRwczovL3NkbHMuZHluYW1zb2Z0b25saW5lLmNvbS8iLCJjaGVja0NvZGUiOi0xMzA1NTA5MjJ9';
-      Dynamsoft.License.LicenseManager.initLicense(license);
+      // const license = 'DLS2eyJoYW5kc2hha2VDb2RlIjoiMTAyOTc1MDEyLVRYbFhaV0pRY205cSIsIm1haW5TZXJ2ZXJVUkwiOiJodHRwczovL21kbHMuZHluYW1zb2Z0b25saW5lLmNvbS8iLCJvcmdhbml6YXRpb25JRCI6IjEwMjk3NTAxMiIsInN0YW5kYnlTZXJ2ZXJVUkwiOiJodHRwczovL3NkbHMuZHluYW1zb2Z0b25saW5lLmNvbS8iLCJjaGVja0NvZGUiOi0xMzA1NTA5MjJ9';
+      // Dynamsoft.License.LicenseManager.initLicense(license);
 
 
       /**
@@ -32,8 +33,16 @@
        * LICENSE ALERT - THE END
        */
 
+      import { loadDynamsoftSDK } from './test.js';
+      
+      // Call the loadDynamsoftSDK function
+      loadDynamsoftSDK()
+      .then(() => {
+
+
+
       // Optional. Used to load wasm resources in advance, reducing latency between video playing and barcode decoding.
-      Dynamsoft.Core.CoreModule.loadWasm(["DBR"]);
+      // Dynamsoft.Core.CoreModule.loadWasm(["DBR"]);
       // Defined globally for easy debugging.
       let cameraEnhancer, cvRouter;
 
@@ -70,7 +79,7 @@
           filter.enableResultCrossVerification("barcode", true);
           // Filter out duplicate barcodes within 3 seconds.
           filter.enableResultDeduplication("barcode", true);
-          filter.setDuplicateForgetTime(10000);
+          filter.setDuplicateForgetTime("barcode", 10000);
           await cvRouter.addResultFilter(filter);
 
           // Open camera and start scanning single barcode.
@@ -82,7 +91,10 @@
           alert(errMsg);
         }
       })();
-
+    }).catch(error => {
+        console.error("Failed to load Dynamsoft SDK:", error);
+        alert("Failed to load Dynamsoft SDK. Please check the console for more details.");
+      });
       async function getScanCount(license = '') {
         let rep = await fetch('https://mdls.dynamsoftonline.com/license/item/103082778', {
           headers: {

@@ -2,15 +2,19 @@
   "name": "dbr-js-scan-count-test",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "test.js",
   "scripts": {
-    "start": "npm run",
+    "start": "vite --port 5505 --host",
     "test": "npx playwright test"
   },
   "author": "Eugene Yu",
   "license": "ISC",
   "devDependencies": {
     "@playwright/test": "^1.46.1",
-    "@types/node": "^22.5.0"
+    "@types/node": "^22.5.0",
+    "vite": "^5.4.2"
+  },
+  "dependencies": {
+    "dynamsoft-barcode-reader-bundle": "10.2.1000"
   }
 }
